@@ -22,18 +22,20 @@ import java.awt.Color;
 public class ClienteJuego extends JFrame implements ActionListener {
 	private static final long serialVersionUID = 1L;
 	Socket socket;
+	String nombre;
 	DataInputStream fentrada;
 	DataOutputStream fsalida;
-	String nombre;
 	JTextField mensaje = new JTextField();
 	private JScrollPane scrollpane;
 	static JTextArea textarea;
 	JButton boton = new JButton("Enviar");
 	JButton desconectar = new JButton("Salir");
 	boolean repetir = true;
+	int numJugador;
+	//Imagenes del juego
 	static ImageIcon iconJuego = new ImageIcon("iconoJuego.png");
 	static ImageIcon iconGanador = new ImageIcon("iconoGanador.png");
-	int numJugador;
+	// Para la espera de 3 seg
 	boolean bloqueo = false;
 	// Componentes de ganador
 	JLabel lblIconoGanador = new JLabel("");
@@ -92,11 +94,10 @@ public class ClienteJuego extends JFrame implements ActionListener {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.socket = socket;
 		this.nombre = nombre;
-		// Se crean los flujos de entrada y salida.
-		// En el flujo de salida se escribe un mensaje
-		// indicando que el cliente se ha unido al Chat.
-		// El HiloServidor recibe este mensaje y
-		// lo reenvía a todos los clientes conectados
+		// Se ha anulado el cierre de la ventana para que la finalización del cliente se haga desde el botón Salir.
+		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		// El flujo de salida escribe un mensaje de que el cliente se ha unido al juego.
+		// El HiloServidor recibe el mensaje y lo reenvía a los los clientes conectados
 		try {
 			fentrada = new DataInputStream(socket.getInputStream());
 			fsalida = new DataOutputStream(socket.getOutputStream());
@@ -109,14 +110,11 @@ public class ClienteJuego extends JFrame implements ActionListener {
 		}
 	}
 
-	// El método main es el que lanza el cliente,
-	// para ello en primer lugar se solicita el nombre o nick del
-	// cliente, una vez especificado el nombre
-	// se crea la conexión al servidor y se crear la pantalla del Chat(ClientChat)
-	// lanzando su ejecución (ejecutar()).
+	// Se crea la conexión al servidor y se crear la pantalla del juego (ClientJuegp) lanzando su ejecución (ejecutar()).
 	public static void main(String[] args) throws Exception {
 		int puerto = 44444;
 		String nombre;
+		//Bucle que pide el nombre al cliente, no sale hasta que se escriba algo
 		do {
 			nombre = (String) JOptionPane.showInputDialog(null, "Introduce tu nombre o nick:", "LOGIN",
 					JOptionPane.INFORMATION_MESSAGE, iconJuego, null, "");
@@ -128,6 +126,7 @@ public class ClienteJuego extends JFrame implements ActionListener {
 						"<<Mensaje de Error:1>>", JOptionPane.ERROR_MESSAGE);
 				System.exit(0);
 			}
+			//Crea el cliente si se introduce un nombre
 			if (!nombre.trim().equals("")) {
 				ClienteJuego cliente = new ClienteJuego(socket, nombre);
 				cliente.setBounds(0, 0, 540, 400);
@@ -141,14 +140,14 @@ public class ClienteJuego extends JFrame implements ActionListener {
 		} while (nombre.trim().equals(""));
 	}
 
-	// Cuando se pulsa el botón Enviar, el mensaje introducido se envía al servidor
-	// por el flujo de salida
+	// Botón Enviar: el mensaje introducido se envía al servidor por el flujo de salida
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == boton) {
 			if (mensaje.isEnabled()) {
 				try {
 					numJugador = Integer.parseInt(mensaje.getText());
 					String texto =nombre + " piensa que el número es el  " + mensaje.getText();
+					// Si el número se ha enviado bien se asegura de restablecer los componentes
 					try {
 						lblError.setText("");
 						mensaje.setText("");
@@ -158,15 +157,13 @@ public class ClienteJuego extends JFrame implements ActionListener {
 						ex.printStackTrace();
 					}
 				} catch (Exception e1) {
+					// Aparece un mensaje si se escribe algo que no se pueda pasar a integer
 					mensaje.setText("");
 					lblError.setText("NO ha introducido el número correctamente.");
 				}
 			}
 		}
-		// Si se pulsa el botón Salir,
-		// se envía un mensaje indicando que el cliente abandona el chat
-		// y también se envía un # para indicar
-		// al servidor que el cliente se ha cerrado
+		// Botón Salir: envía un mensaje indicando que el cliente abandona el juego con un # para indicar al servidor que el cliente se ha cerrado
 		if (e.getSource() == desconectar) {
 			try {
 				fsalida.writeUTF("#Ha abandonado el juego el jugador... "+nombre);
@@ -178,25 +175,25 @@ public class ClienteJuego extends JFrame implements ActionListener {
 		}
 	}
 
-	// Dentro del método ejecutar(), el cliente lee lo que el
-	// hilo le manda (mensajes del Chat) y lo muestra en el textarea.
-	// Esto se ejecuta en un bucle del que solo se sale
-	// en el momento que el cliente pulse el botón Salir
-	// y se modifique la variable repetir
+
 	public void ejecutar() {
 		String texto = "";
 		while (repetir) {
 			try {
 				texto = fentrada.readUTF();
+				// Si no es el mensaje con el nombre del ganador entra
 				if (!texto.startsWith("*")) {
 					textarea.setText(texto);
+					// Bloquea el poder escribir por 3s. si se ha introducido un numero incorrecto
 					if(bloqueo & !texto.endsWith("¡¡¡¡Y HA ACERTADOOOO!!!!\n")) {
 						mensaje.setEnabled(false);
 						Thread.sleep(3000);
 						mensaje.setEnabled(true);
+						mensaje.requestFocus();
 						bloqueo=false;
 					}
 				} else {
+					// Si alguien ha ganado se bloquea el poder escribir y aparece el ganador
 					lblIconoGanador.setVisible(true);
 					lblTituloGanador.setVisible(true);
 					lblGanador.setText(texto.substring(1, texto.length()));
@@ -206,6 +203,7 @@ public class ClienteJuego extends JFrame implements ActionListener {
 				}
 
 			} catch (IOException ex) {
+				// Sale del bucle tras un mensaje de error
 				JOptionPane.showMessageDialog(null, "Imposible conectar con el servidor \n" + ex.getMessage(),
 						"<<Mensaje de Error:2>>", JOptionPane.ERROR_MESSAGE);
 				repetir = false;
@@ -214,6 +212,7 @@ public class ClienteJuego extends JFrame implements ActionListener {
 				e.printStackTrace();
 			}
 		}
+		//Cerrar el socket y salir
 		try {
 			socket.close();
 			System.exit(0);

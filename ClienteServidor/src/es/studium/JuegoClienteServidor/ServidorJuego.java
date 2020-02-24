@@ -18,7 +18,7 @@ import javax.swing.JTextField;
 public class ServidorJuego extends JFrame implements ActionListener {
 	private static final long serialVersionUID = 1L;
 	static ServerSocket servidor;
-	//Datos de la conexion
+	// Datos de la conexion
 	static final int PUERTO = 44444;
 	static int CONEXIONES = 0;
 	static int ACTUALES = 0;
@@ -29,7 +29,7 @@ public class ServidorJuego extends JFrame implements ActionListener {
 	static JTextArea textarea;
 	JButton salir = new JButton("Salir");
 	static Socket[] tabla = new Socket[MAXIMO];
-	//Datos para el número generado por el juego
+	// Datos para el número generado por el juego
 	public static int numAdivinar;
 	static int numMaxAdivinar=100;
 	static Random rd = new Random();
@@ -60,8 +60,7 @@ public class ServidorJuego extends JFrame implements ActionListener {
 	}
 
 	public static void main(String args[]) throws Exception {
-		//Desde el main se inicia el servidor
-		//y las variables y se prepara la pantalla
+		// Se inicia el servidor y las variables y se prepara la pantalla.
 		servidor = new ServerSocket(PUERTO);
 		System.out.println("Servidor iniciado...");
 		ServidorJuego pantalla = new ServidorJuego();
@@ -70,9 +69,8 @@ public class ServidorJuego extends JFrame implements ActionListener {
 		mensaje.setText("Número de conexiones actuales: " + 0);
 		numAdivinar = rd.nextInt(numMaxAdivinar) + 1;
 		System.out.println(numAdivinar);
-		//Se usa un bucle para controlar el número de conexiones.
-		//Dentro del bucle el servidor espera la conexión
-		//del cliente y cuando se conecta se crea un socket
+		// Bucle para controlar el número de conexiones.
+		// En el bucle el servidor espera la conexión del cliente y cuando se conecta se crea un socket
 		while (CONEXIONES < MAXIMO) {
 			Socket socket;
 			try {
@@ -81,22 +79,14 @@ public class ServidorJuego extends JFrame implements ActionListener {
 				//Sale por aquí si pulsamos el botón salir
 				break;
 			}
-			//El socket creado se añade a la tabla,
-			//se incrementa el número de conexiones
-			//y se lanza el hilo para gestionar los mensajes
-			//del cliente que se acaba de conectar
+			//El socket se añade a la tabla, se incrementa el número de conexiones y se lanza el hilo para gestionar los mensajes del cliente que se acaba de conectar
 			tabla[CONEXIONES] = socket;
 			CONEXIONES++;
 			ACTUALES++;
 			HiloServidor hilo = new HiloServidor(socket);
 			hilo.start();
 		}
-		//Si se alcanzan 15 conexiones o se pulsa el botón Salir
-		//el programa se sale del bucle.
-		//Al pulsar Salir se cierra el ServerSocket
-		//lo que provoca una excepción (SocketException)
-		//en la sentencia accept(), la excepción se captura
-		//y se ejecuta un break para salir del bucle
+		// 25 conexiones o el botón Salir hace que el programa se salga del bucle.
 		if (!servidor.isClosed()) {
 			try {
 				mensaje2.setForeground(Color.red);
@@ -111,6 +101,7 @@ public class ServidorJuego extends JFrame implements ActionListener {
 	}
 
 	public void actionPerformed(ActionEvent e) {
+		// Al pulsar Salir se cierra el ServerSocket
 		if (e.getSource() == salir) {
 			try {
 				servidor.close();
