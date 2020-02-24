@@ -1,4 +1,4 @@
-package es.studium.ChatClienteServidor;
+package es.studium.JuegoClienteServidor;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

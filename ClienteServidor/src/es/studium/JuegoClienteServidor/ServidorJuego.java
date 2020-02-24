@@ -1,4 +1,4 @@
-package es.studium.ChatClienteServidor;
+package es.studium.JuegoClienteServidor;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -18,6 +18,7 @@ import javax.swing.JTextField;
 public class ServidorJuego extends JFrame implements ActionListener {
 	private static final long serialVersionUID = 1L;
 	static ServerSocket servidor;
+	//Datos de la conexion
 	static final int PUERTO = 44444;
 	static int CONEXIONES = 0;
 	static int ACTUALES = 0;
@@ -28,6 +29,7 @@ public class ServidorJuego extends JFrame implements ActionListener {
 	static JTextArea textarea;
 	JButton salir = new JButton("Salir");
 	static Socket[] tabla = new Socket[MAXIMO];
+	//Datos para el número generado por el juego
 	public static int numAdivinar;
 	static int numMaxAdivinar=100;
 	static Random rd = new Random();
@@ -52,12 +54,9 @@ public class ServidorJuego extends JFrame implements ActionListener {
 		salir.setBounds(420, 10, 100, 30);
 		getContentPane().add(salir);
 		textarea.setEditable(false);
-		// Se ha anulado el cierre de la ventana para que la finalización
-		// del servidor se haga desde el botón Salir.
-		// Cuando se pulsa el botón se cierra el ServerSocket y
-		//finaliza la ejecución
 		salir.addActionListener(this);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		// Se ha anulado el cierre de la ventana para que la finalización del servidor se haga desde el botón Salir.
+		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 	}
 
 	public static void main(String args[]) throws Exception {

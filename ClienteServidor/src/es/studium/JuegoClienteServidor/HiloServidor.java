@@ -1,4 +1,4 @@
-package es.studium.ChatClienteServidor;
+package es.studium.JuegoClienteServidor;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -82,11 +82,11 @@ public class HiloServidor extends Thread {
 	}
 
 	// Envía el texto del textarea a todos los sockets de la tabla de sockets, todos ven la conversación.
-	// El programa abre un stream de salida para escribir el texto en el socket
 	private void EnviarMensajes(String texto) {
 		for (int i = 0; i < ServidorJuego.CONEXIONES; i++) {
 			Socket socket = ServidorJuego.tabla[i];
 			try {
+				// El programa abre un stream de salida para escribir el texto en el socket
 				DataOutputStream fsalida = new DataOutputStream(socket.getOutputStream());
 				fsalida.writeUTF(texto);
 			} catch (IOException e) {
