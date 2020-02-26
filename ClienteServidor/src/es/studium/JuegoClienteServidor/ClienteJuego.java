@@ -127,7 +127,7 @@ public class ClienteJuego extends JFrame implements ActionListener {
 		} while (nombre.trim().equals(""));
 		Socket socket = null;
 		try {
-			socket = new Socket("127.0.0.1", puerto);
+			socket = new Socket("192.168.0.41", puerto);
 		} catch (IOException ex) {
 			JOptionPane.showMessageDialog(null, "Imposible conectar con el servidor \n" + ex.getMessage(),
 					"<<Mensaje de Error:1>>", JOptionPane.ERROR_MESSAGE);
